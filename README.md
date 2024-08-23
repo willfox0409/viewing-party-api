@@ -1,24 +1,17 @@
-# README
+# Viewing Part API - Solo Project
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is the base repo for the Viewing Party Solo Project for Module 3 in Turing's Software Engineering Program. 
 
-Things you may want to cover:
+## About this Application
 
-* Ruby version
+Viewing Party is an application that allows users to explore movies and create a Viewing Party Event that invites users and keeps track of a host. Once completed, this application will collect relevant information about movies from an external API, provide CRUD functionality for creating a Viewing Party and restrict its use to only verified users. 
 
-* System dependencies
+## Setup
 
-* Configuration
+1. Fork and clone the repo
+2. Install gem packages: `bundle install`
+3. Setup the database: `rails db:{drop,create,migrate,seed}`
 
-* Database creation
+Spend some time familiarizing yourself with the functionality and structure of the application so far.
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Run the application and test out some endpoints: `rails s`
