@@ -1,7 +1,8 @@
 class ErrorSerializer
-  def self.format_error(error)
+  def self.format_error(error_message)
     {
-      message: error.full_messages
+      message: error_message.message,
+      status: error_message.status_code
     }
   end
 end

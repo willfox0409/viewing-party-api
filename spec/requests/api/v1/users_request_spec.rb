@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe "Users API", type: :request do
-  describe "#create action" do
+  describe "Create User Endpoint" do
     let(:user_params) do
       {
         name: "Me",
@@ -32,10 +32,11 @@ RSpec.describe "Users API", type: :request do
         User.create!(name: "me", username: "its_me", password: "abc123")
 
         post api_v1_users_path, params: user_params, as: :json
-        data = JSON.parse(response.body, symbolize_names: true)
+        json = JSON.parse(response.body, symbolize_names: true)
 
         expect(response).to have_http_status(:bad_request)
-        expect(data[:message]).to eq(["Username has already been taken"])
+        expect(json[:message]).to eq("Username has already been taken")
+        expect(json[:status]).to eq(400)
       end
 
       it "returns an error when password does not match password confirmation" do
@@ -47,21 +48,43 @@ RSpec.describe "Users API", type: :request do
         }
 
         post api_v1_users_path, params: user_params, as: :json
-        data = JSON.parse(response.body, symbolize_names: true)
+        json = JSON.parse(response.body, symbolize_names: true)
 
         expect(response).to have_http_status(:bad_request)
-        expect(data[:message]).to eq(["Password confirmation doesn't match Password"])
+        expect(json[:message]).to eq("Password confirmation doesn't match Password")
+        expect(json[:status]).to eq(400)
       end
 
       it "returns an error for missing field" do
         user_params[:username] = ""
 
         post api_v1_users_path, params: user_params, as: :json
-        data = JSON.parse(response.body, symbolize_names: true)
+        json = JSON.parse(response.body, symbolize_names: true)
 
         expect(response).to have_http_status(:bad_request)
-        expect(data[:message]).to eq(["Username can't be blank"])
+        expect(json[:message]).to eq("Username can't be blank")
+        expect(json[:status]).to eq(400)
       end
+    end
+  end
+
+  describe "Get All Users Endpoint" do
+    it "retrieves all users but does not share any sensitive data" do
+      User.create!(name: "Tom", username: "myspace_creator", password: "test123")
+      User.create!(name: "Oprah", username: "oprah", password: "abcqwerty")
+      User.create!(name: "Beyonce", username: "sasha_fierce", password: "blueivy")
+
+      get api_v1_users_path
+
+      expect(response).to be_successful
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(json[:data].count).to eq(3)
+      expect(json[:data][0][:attributes]).to have_key(:name)
+      expect(json[:data][0][:attributes]).to have_key(:username)
+      expect(json[:data][0][:attributes]).to_not have_key(:password)
+      expect(json[:data][0][:attributes]).to_not have_key(:password_digest)
+      expect(json[:data][0][:attributes]).to_not have_key(:api_key)
     end
   end
 end
