@@ -1,6 +1,7 @@
 class Api::V1::MoviesController < ApplicationController
 
   def index
-    render json: MovieSerializer.format_user_list(Movie.all)
+    movies = MovieService.get_top_rated
+    render json: MovieSerializer.new(movies)
   end
 end 
