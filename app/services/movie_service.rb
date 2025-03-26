@@ -1,5 +1,5 @@
 class MovieService
-  def self.get_top_rated
+  def self.get_top_rated_movies
     response = Faraday.get("https://api.themoviedb.org/3/movie/top_rated") do |req|
       req.params["api_key"] = Rails.application.credentials.movie_db_api_key
       req.params["language"] = "en-US"
