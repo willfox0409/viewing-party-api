@@ -4,10 +4,6 @@ RSpec.describe "Movies endpoints", type: :request do
   describe "#index" do
     it "lists the top rated movies in TMDB" do
 
-      get "/api/v1/movies/top_rated"
-
-      movies = JSON.parse(response.body, symbolize_names: true)
-
       stub_request(:get, "https://api.themoviedb.org/3/movie/top_rated")
       .with(query: hash_including({ "page" => "1" }))
       .to_return(
@@ -20,22 +16,24 @@ RSpec.describe "Movies endpoints", type: :request do
         }.to_json,
         headers: { "Content-Type" => "application/json" }
       )
+      get "/api/v1/movies"
 
-      response = MovieService.get_top_rated_movies
+      movies = JSON.parse(response.body, symbolize_names: true)
+      
+      expect(response).to be_successful
+      expect(movies[:data].length).to eq(2)
 
-      expect(response).to be_an(Array)
-      expect(response.first.title).to eq("Pulp Fiction")
-      expect(response.first.vote_average).to eq(9.2)
-
-      # movies[:data].each do |movie|
-      #   expect(response).to be_successful
-      #   expect(merchants[:data].length).to eq(2)
-      #   expect(merchant).to have_key(:id)
-      #   expect(merchant[:id]).to be_an(String)
-      #   expect(merchant[:attributes]).to have_key(:title)
-      #   expect(merchant[:attributes]).to have_key(:vote_average)
-      #   expect(merchant[:attributes][:name]).to be_a(String)
-      #   expect(merchant[:attributes][:vote_average]).to be_a(String)
+      movies[:data].each do |movie|
+        puts JSON.pretty_generate(movies)
+        expect(movie).to have_key(:id)
+        expect(movie[:id]).to be_a(String)
+      
+        expect(movie).to have_key(:attributes)
+        expect(movie[:attributes]).to have_key(:title)
+        expect(movie[:attributes]).to have_key(:vote_average)
+      
+        expect(movie[:attributes][:title]).to be_a(String)
+        expect(movie[:attributes][:vote_average]).to be_a(Float).or be_a(Integer)
       end
     end
   end
