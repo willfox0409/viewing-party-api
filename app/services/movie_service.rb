@@ -31,4 +31,11 @@ class MovieService
       Movie.new(movie_data)
     end
   end
+
+  def self.get_movie_runtime(movie_id)
+    response = conn.get("movie/#{movie_id}")
+    json = JSON.parse(response.body, symbolize_names: true)
+
+    json[:runtime]
+  end
 end
