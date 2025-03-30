@@ -6,15 +6,20 @@ class ViewingParty < ApplicationRecord
   validates :movie_title, presence: true
   validates :movie_id, presence: true 
 
+  validate :end_time_after_start_time
+  validate :duration_meets_runtime
+
   def self.create_with_invitees(params)
     invitees = params.delete(:invitees) #delete AND EXTRACT
     party = ViewingParty.new(params) #initialize viewing party with params data (ruby object)
-
+    runtime = MovieService.get_movie_runtime(params[:movie_id]) #makes real API call
+    duration = ((party.end_time - party.start_time) / 60).to_i
+  
     return party unless party.save #try to save party, if save fails, return early
-
+    
     invitees.each_with_index do |user_id, index| # Loop through User IDs
       user = User.find_by(id: user_id)
-      raise ActiveRecord::RecordNotFound, "User ID #{user_id} not found" unless user
+      next unless user # skips invlaid users without raising an error
 
       Invitation.create!(
         user: user,
@@ -25,5 +30,24 @@ class ViewingParty < ApplicationRecord
 
     party
   end
-  
+
+  def end_time_after_start_time
+    if end_time.present? && start_time.present? && end_time <= start_time
+      errors.add(:end_time, "must be after start time")
+    end
+  end
+
+  validate :end_time_after_start_time
+  validate :duration_meets_runtime
+
+  def duration_meets_runtime
+    return if movie_id.blank? || start_time.blank? || end_time.blank?
+
+    runtime = MovieService.get_movie_runtime(movie_id)
+    duration = ((end_time - start_time) / 60).to_i
+
+    if duration < runtime
+      errors.add(:base, "Party duration must be at least the length of the movie")
+    end
+  end
 end
