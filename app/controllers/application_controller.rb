@@ -5,7 +5,7 @@ class ApplicationController < ActionController::API
   private
 
   def render_not_found(error)
-    render json: ErrorSerializer.format_error(error.message, 400), status: :bad_request
+    render json: ErrorSerializer.format_error(error.message, 404), status: :not_found
   end
   
   def render_unprocessable(error)
