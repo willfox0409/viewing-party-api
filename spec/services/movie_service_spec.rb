@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe MovieService do 
-  describe 'INDEX / .get_top_rated_movies' do 
+  describe '.get_top_rated_movies' do 
     it 'returns parsed movie data from TMDB API' do 
       stub_request(:get, "https://api.themoviedb.org/3/movie/top_rated")
       .with(query: hash_including({ "page" => "1" }))
@@ -24,7 +24,7 @@ RSpec.describe MovieService do
     end
   end
 
-  describe 'INDEX / .search_movies' do 
+  describe '.search_movies' do 
     it 'returns parsed movie data from TMDB API based on search params' do 
       stub_request(:get, "https://api.themoviedb.org/3/search/movie")
       .with(query: hash_including({ "page" => "1" }))
@@ -46,6 +46,26 @@ RSpec.describe MovieService do
       expect(response.length).to eq(3)
       expect(response.first.title).to eq("The Lord of the Rings: The Fellowship of the Ring")
       expect(response.first.vote_average).to eq(8.413)
+    end
+  end
+
+  describe '.get_movie_runtime' do
+    it 'returns the runtime of a specific movie by ID' do
+      stub_request(:get, "https://api.themoviedb.org/3/movie/278")
+        .with(query: hash_including({}))
+        .to_return(
+          status: 200,
+          body: {
+            id: 278,
+            title: "The Shawshank Redemption",
+            runtime: 142
+          }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+  
+      runtime = MovieService.get_movie_runtime(278)
+  
+      expect(runtime).to eq(142)
     end
   end
 end
