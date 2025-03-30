@@ -5,7 +5,7 @@ class Api::V1::ViewingPartiesController < ApplicationController
     if party.persisted?
       render json: ViewingPartySerializer.new(party), status: :created
     else
-      render json: ErrorSerializer.format_error(party.errors.full_messages.to_sentence, 422), status: :unprocessable_entity
+      render json: ErrorSerializer.format_errors_array(party.errors.full_messages, 422), status: :unprocessable_entity
     end
   end
 
