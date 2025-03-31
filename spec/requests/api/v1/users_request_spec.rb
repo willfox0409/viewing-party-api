@@ -68,7 +68,7 @@ RSpec.describe "Users API", type: :request do
     end
   end
 
-  describe "Get All Users Endpoint" do
+  describe "#index - Get All Users Endpoint" do
     it "retrieves all users but does not share any sensitive data" do
       User.create!(name: "Tom", username: "myspace_creator", password: "test123")
       User.create!(name: "Oprah", username: "oprah", password: "abcqwerty")
@@ -85,6 +85,57 @@ RSpec.describe "Users API", type: :request do
       expect(json[:data][0][:attributes]).to_not have_key(:password)
       expect(json[:data][0][:attributes]).to_not have_key(:password_digest)
       expect(json[:data][0][:attributes]).to_not have_key(:api_key)
+    end
+  end
+
+  describe "#show - Get User Profile Endpoint" do
+    before do 
+      stub_request(:get, "https://api.themoviedb.org/3/movie/603")
+        .with(query: hash_including({}))
+        .to_return(
+          status: 200,
+          body: {
+            id: 603,
+            title: "The Matrix",
+            runtime: 136
+          }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+    end
+    it "returns a user's full profile with hosted and invited parties" do #happy path
+      user = User.create!(name: "Keanu", username: "neo", password: "matrix")
+      party = ViewingParty.create!(
+        name: "Matrix Reloaded",
+        movie_id: 603,
+        movie_title: "The Matrix Reloaded",
+        start_time: Time.now + 1.day,
+        end_time: Time.now + 1.day + 3.hours
+      )
+      Invitation.create!(user: user, viewing_party: party, host: true)
+
+      get "/api/v1/users/#{user.id}" #I like to use explicit path 
+
+      expect(response).to be_successful
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(json[:data][:id]).to eq(user.id.to_s)
+      expect(json[:data][:type]).to eq("user")
+      expect(json[:data][:attributes][:name]).to eq("Keanu")
+      expect(json[:data][:attributes][:username]).to eq("neo")
+
+      expect(json[:data][:attributes]).to have_key(:viewing_parties_hosted)
+      expect(json[:data][:attributes]).to have_key(:viewing_parties_invited)
+      expect(json[:data][:attributes]).to_not have_key(:password_digest)
+      expect(json[:data][:attributes]).to_not have_key(:api_key)
+    end
+
+    it "returns 404 if the user is not found" do #sad path 
+      get "/api/v1/users/999999"
+
+      expect(response).to have_http_status(:not_found)
+
+      json = JSON.parse(response.body, symbolize_names: true)
+      expect(json[:errors].first[:detail]).to match(/couldn't find user/i) #regex matching case insensitive
     end
   end
 end
