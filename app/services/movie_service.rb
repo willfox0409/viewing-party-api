@@ -38,4 +38,19 @@ class MovieService
 
     json[:runtime]
   end
+
+  def self.get_movie_details(movie_id) #SRP, one of three helper methods
+    response = conn.get("movie/#{movie_id}")
+    json = JSON.parse(response.body, symbolize_names: true)
+  end
+
+  def self.get_movie_credits(movie_id)
+    response = conn.get("movie/#{movie_id}/credits")
+    json = JSON.parse(response.body, symbolize_names: true)
+  end
+
+  def self.get_movie_reviews(movie_id)
+    response = conn.get("movie/#{movie_id}/reviews")
+    json = JSON.parse(response.body, symbolize_names: true)
+  end
 end
