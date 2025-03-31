@@ -49,7 +49,7 @@ RSpec.describe "Invitations API", type: :request do
       
       expect(response).to have_http_status(:not_found)
       expect(json[:status]).to eq(404)
-      expect(json[:message]).to match(/Couldn't find ViewingParty/)
+      expect(json[:errors].first[:detail]).to match(/Couldn't find ViewingParty/)
       expect(Invitation.count).to eq(0)
     end
 
@@ -67,7 +67,7 @@ RSpec.describe "Invitations API", type: :request do
     
       expect(response).to have_http_status(:not_found)
       expect(json[:status]).to eq(404)
-      expect(json[:message]).to match(/Invalid user/i)
+      expect(json[:errors].first[:detail]).to match(/Invalid user/i)
       expect(Invitation.count).to eq(0)
     end
   end
