@@ -5,11 +5,7 @@ class ApplicationController < ActionController::API
   private
 
   def render_not_found(error)
-    if request.path.start_with?("/api/v1/movies")
-      render json: ErrorSerializer.format_errors_array(error.message, 404), status: :not_found
-    else
-      render json: ErrorSerializer.format_error(error.message, 404), status: :not_found
-    end
+    render json: ErrorSerializer.format_errors_array(error.message, 404), status: :not_found
   end
   
   def render_unprocessable(error)
