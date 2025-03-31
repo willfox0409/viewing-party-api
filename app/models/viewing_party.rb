@@ -37,9 +37,6 @@ class ViewingParty < ApplicationRecord
     end
   end
 
-  validate :end_time_after_start_time
-  validate :duration_meets_runtime
-
   def duration_meets_runtime
     return if movie_id.blank? || start_time.blank? || end_time.blank?
 
