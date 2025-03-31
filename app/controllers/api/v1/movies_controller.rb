@@ -9,4 +9,9 @@ class Api::V1::MoviesController < ApplicationController
 
     render json: MovieSerializer.new(movies)
   end
+
+  def show
+    movie = MovieDetails.build_movie_details(params[:id])
+    render json: MovieDetailsSerializer.new(movie)
+  end
 end 
