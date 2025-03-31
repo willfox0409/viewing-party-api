@@ -12,6 +12,11 @@ class Api::V1::UsersController < ApplicationController
     render json: UserSerializer.format_user_list(User.all)
   end
 
+  def show
+    user = User.find(params[:id]) #Invalid ID is handled in rescue_from app controller
+    render json: UserProfileSerializer.new(user)
+  end
+
   private
 
   def user_params
